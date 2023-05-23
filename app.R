@@ -11,18 +11,18 @@
 ##
 ################################################################################
 
+FULL_DEBUG <- TRUE
+IN_TEST_MODE <- FALSE
+
+
+FILE_APP <- "app.R"
+
 source("base/load_base_packages.R")
 source("utilities/utils.R")
 source("db_access/db_access.R")
 source("core/data_explorer.R")
 source("core/data_processor.R")
 
-
-FULL_DEBUG <- TRUE
-IN_TEST_MODE <- FALSE
-
-
-FILE_APP <- "app.R"
 
 ################################################################################
 ## main
