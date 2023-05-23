@@ -1,6 +1,6 @@
 ################################################################################
 ##
-## reference : 
+## references : 
 ##  http://rafalab.dfci.harvard.edu/dsbook/string-processing.html#string-splitting 
 ##  https://viz-ggplot2.rsquaredacademy.com/ggplot2-modify-legend.html
 ##
@@ -13,8 +13,6 @@
 
 FULL_DEBUG <- TRUE
 IN_TEST_MODE <- FALSE
-
-
 FILE_APP <- "app.R"
 
 source("base/load_base_packages.R")
