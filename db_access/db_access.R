@@ -6,7 +6,7 @@ fnCreateConnection <- function(my_db_driver, my_db_name, my_db_host, my_db_port,
    CURRENT_FUNCTION <- "createConnection()"
    
    if (IN_TEST_MODE==TRUE){
-     fnLogMessage(paste0(FILE_DB_ACCESS, ".", CURRENT_FUNCTION, " - IN_TEST_MODE  - for test purposes to we bypass db by returning NA for connection."))
+     fnLogMessage(paste0(FILE_DB_ACCESS, ".", CURRENT_FUNCTION, " - IN_TEST_MODE  - returning NA for connection to bypass db for test purposes."))
      
      return (NA) # if in test mode bypass db
    }
