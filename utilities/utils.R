@@ -1,8 +1,5 @@
 
 
-FULL_DEBUG <- TRUE
-IN_TEST_MODE <- TRUE
-
 TABLE_LOAD_STATS <- "load_stats"
 TABLE_RECORDS_COMPLETE <- "cases_reported_complete"
 TABLE_RECORDS_BAD <- "cases_reported_bad"

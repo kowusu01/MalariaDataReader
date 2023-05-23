@@ -17,6 +17,11 @@ source("db_access/db_access.R")
 source("core/data_explorer.R")
 source("core/data_processor.R")
 
+
+FULL_DEBUG <- TRUE
+IN_TEST_MODE <- FALSE
+
+
 FILE_APP <- "app.R"
 
 ################################################################################
