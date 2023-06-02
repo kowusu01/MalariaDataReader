@@ -11,12 +11,28 @@ MALARIA_REPORTED_DATA_COL_HEADERS <- c("country", "year","num_cases","num_deaths
 MALARIAL_REPORTED_DATA_DB_TABLE <- "reported_data"
 
 ################################################################################
-## log message
+## fnLogMessage()
 ################################################################################
 fnLogMessage <- function(msg){
   print(paste(Sys.time(), "-", msg))
 }
 
+################################################################################
+## fnDisplayDataset()
+################################################################################
+fnDisplayDataset <- function(data_set, default_msg){
+  
+  CURRENT_FUNCTION <- "fnDisplayDataSet()"
+  
+  if(FULL_DEBUG=="TRUE"){
+    if ( is.data.frame(data_set))
+      glimpse(data_set)
+    else{
+      if(!is.na(default_msg))
+        fnLogMessage(default_msg)
+    }
+  }
+}
 
 FULL_DEBUG   <- Sys.getenv("FS_IN_DEBUG_MODE", unset = "FALSE")
 IN_TEST_MODE <- Sys.getenv("FS_IN_TEST_MODE", unset = "FALSE")

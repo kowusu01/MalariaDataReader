@@ -373,17 +373,3 @@ fnSaveErrorToDB <- function(data_file_path, error_msg, db_table, db_connection, 
   }
     
 }
-
-fnDisplayDataset <- function(data_set, default_msg){
-  
-  CURRENT_FUNCTION <- "fnDisplayDataSet()"
-  
-  if(FULL_DEBUG=="TRUE"){
-    if (nrow(data_set) > 0)
-      glimpse(data_set)
-    else{
-      if(!is.na(default_msg))
-        fnLogMessage(default_msg)
-    }
-  }
-}

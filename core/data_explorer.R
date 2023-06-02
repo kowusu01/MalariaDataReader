@@ -29,6 +29,7 @@ fnFindNullsInColumn <- function(data_set,taregt_col_name){
              issue=rep(paste(taregt_col_name, ' is null'), nrow(null_values_in_target_col)))
   }
   
+  
   fnDisplayDataset(null_values_in_target_col, paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - issues details dataset is empty"))
   
   
