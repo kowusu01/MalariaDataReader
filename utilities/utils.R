@@ -32,9 +32,10 @@ DB_PORT <- Sys.getenv("DBPort")
 DB_USER<- Sys.getenv("DBUsername")
 DB_PASSWORD <- Sys.getenv("DBPassword")
 
+# in test mode, we bypass db, so no need to show db info
 env_db_info <- paste0("ENVIRONMENT INFO - db_diver: ", DB_DRIVER, " db_server: ", DB_SERVER_NAME , " port: ", DB_PORT, " db_instance: ", DB_INSTANCE, " user: ", DB_USER," pw: ", DB_PASSWORD )
-if (FULL_DEBUG=="TRUE" && IN_TEST_MODE=="TRUE")
-  fnLogMessage(env_db_info)
+if (IN_TEST_MODE=="FALSE" && FULL_DEBUG=="TRUE" )
+  fnLogMessage(env_db_info) # just to make sure we are reading the correct variables
 
 DATA_FOLDER_NAME <- Sys.getenv("FS_READER_DATA_PATH")
 COMPLETED_DATA_FOLDER <- Sys.getenv("FS_READER_DATA_COMPLETED_PATH")
