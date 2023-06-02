@@ -1,5 +1,5 @@
 
-fnFindNullsInColumn <- function(taregt_col_name, data_set){
+fnFindNullsInColumn <- function(data_set,taregt_col_name){
   
   null_values_in_target_col <- data.frame()
   
