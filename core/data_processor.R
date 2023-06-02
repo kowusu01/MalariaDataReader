@@ -342,7 +342,7 @@ fnSaveErrorToDB <- function(data_file_path, error_msg, db_table, db_connection, 
       error_message = error_msg
     )
    
-    if (FULL_DEBUG==TRUE){
+    if (FULL_DEBUG=="TRUE"){
       glimpse(error_stats)
     }
 
@@ -362,7 +362,7 @@ fnSaveErrorToDB <- function(data_file_path, error_msg, db_table, db_connection, 
     #db_table = "load_stats"
     query <- paste0("update ", db_table, " set load_status='Error', error_message='", error_msg , "' where id=", current_record_id )
     
-    if (FULL_DEBUG==TRUE){
+    if (FULL_DEBUG=="TRUE"){
       fnLogMesasge(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - ", query))
     }
     
@@ -378,7 +378,7 @@ fnDisplayDataset <- function(data_set, default_msg){
   
   CURRENT_FUNCTION <- "fnDisplayDataSet()"
   
-  if(FULL_DEBUG==TRUE){
+  if(FULL_DEBUG=="TRUE"){
     if (nrow(data_set) > 0)
       glimpse(data_set)
     else{

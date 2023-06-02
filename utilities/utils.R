@@ -57,5 +57,5 @@ env_data_path_info <- paste0("DATA PATH INFO - data folder: [", DATA_FOLDER_NAME
  BAD_DATA_FOLDER, "], Process Intervals: [",
  FILE_READER_WAIT_TIME_IN_SECONDS, "]", ". Unique data file names enforced? [", FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES,"]")
 
-if (FULL_DEBUG=="TRUE" && IN_TEST_MODE=="TRUE")
+if ((FULL_DEBUG=="TRUE") && (IN_TEST_MODE=="TRUE"))
   fnLogMessage(env_data_path_info)
