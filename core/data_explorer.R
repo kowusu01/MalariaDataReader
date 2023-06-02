@@ -1,6 +1,8 @@
 
 fnFindNullsInColumn <- function(data_set,taregt_col_name){
   
+  CURRENT_FUNCTION <- "fnFindNullsInColumn"
+  
   null_values_in_target_col <- data.frame()
   
   if(taregt_col_name=="country"){
