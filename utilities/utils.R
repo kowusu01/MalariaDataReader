@@ -19,6 +19,13 @@ fnLogMessage <- function(msg){
   print(paste(Sys.time(), "-", msg))
 }
 
+
+FULL_DEBUG   <- Sys.getenv("FS_IN_DEBUG_MODE", unset = FALSE)
+IN_TEST_MODE <- Sys.getenv("FS_IN_TEST_MODE", unset = FALSE)
+
+fnLogMessage(paste0("APP RUNNING IN DEBUG MODE: ", FULL_DEBUG))
+fnLogMessage(paste0("APP RUNNING IN TEST MODE: ", IN_TEST_MODE))
+
 # using environment variables
 DB_DRIVER <- Sys.getenv("PostgresDriver")
 DB_SERVER_NAME <- Sys.getenv("DBServerName")
@@ -34,7 +41,23 @@ if (FULL_DEBUG && IN_TEST_MODE)
 DATA_FOLDER_NAME <- Sys.getenv("FS_READER_DATA_PATH")
 COMPLETED_DATA_FOLDER <- Sys.getenv("FS_READER_DATA_COMPLETED_PATH")
 BAD_DATA_FOLDER <- Sys.getenv("FS_READER_DATA_BAD_PATH")
-env_data_path_info <- paste0("DATA PATH INFO - data folder: [", DATA_FOLDER_NAME, "], completed data folder: [", COMPLETED_DATA_FOLDER , "], bad data folder: [", BAD_DATA_FOLDER, "]")
+
+FILE_READER_WAIT_TIME_IN_SECONDS <- Sys.getenv("FILE_READER_WAIT_TIME_IN_SECS", unset = NA)
+if (is.na(FILE_READER_WAIT_TIME_IN_SECONDS)){
+  fnLogMessage(paste0("Unable to find the value for environment variable FILE_READER_WAIT_TIME_IN_SECONDS. Setting the value to default: ", DEFAULT_FILE_READER_PROCESS_INTERVAL, "seconds"))
+  FILE_READER_WAIT_TIME_IN_SECONDS <- DEFAULT_FILE_READER_PROCESS_INTERVAL
+}
+
+
+FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- Sys.getenv("FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES", unset = NA)
+if (is.na(FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES)){
+  fnLogMessage(paste0("Unable to find the value for environment variable FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES. Setting the value to default: FALSE"))
+  FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- FALSE
+}
+
+env_data_path_info <- paste0("DATA PATH INFO - data folder: [", DATA_FOLDER_NAME, "], completed data folder: [", COMPLETED_DATA_FOLDER , "], bad data folder: [", 
+ BAD_DATA_FOLDER, "], Process Intervals: [",
+ FILE_READER_WAIT_TIME_IN_SECONDS, "]", ". Unique data file names enforced? [", FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES,"]")
 
 if (FULL_DEBUG && IN_TEST_MODE)
   fnLogMessage(env_data_path_info)

@@ -1,7 +1,7 @@
 
-fnFindNullsInColumn <- function(data_set, taregt_col_name){
+fnFindNullsInColumn <- function(taregt_col_name, data_set){
   
-  null_values_in_target_col <- NA
+  null_values_in_target_col <- data.frame()
   
   if(taregt_col_name=="country"){
     null_values_in_target_col <- data_set[is.na(data_set$country), ]
@@ -26,9 +26,15 @@ fnFindNullsInColumn <- function(data_set, taregt_col_name){
              issue_type=rep(ISSUE_TYPE_ERROR, nrow(null_values_in_target_col)), 
              issue=rep(paste(taregt_col_name, ' is null'), nrow(null_values_in_target_col)))
   }
-  return(null_values_in_target_col)
+  
+  fnDisplayDataset(null_values_in_target_col, paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - issues details dataset is empty"))
+  
+  
 }
 
+fnFindDataErrors <- function(data_set, target_column_name){
+  
+}
 
 fnDataInconsistencyNumDeaths <- function(data_set){
   data_set_complete_cases <- data_set[complete.cases(data_set), ]
