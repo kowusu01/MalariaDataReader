@@ -42,7 +42,7 @@ fnUpdateLoadStatus <- function(db_connection, status){
   
   CURRENT_FUNCTION <- "fnUpdateLoadStatus()"
   
-  if (!IN_TEST_MODE){
+  if (IN_TEST_MODE=="FALSE"){
     current_load_id <- fnGetLoadStatsId(db_connection)
     DBI::dbSendQuery(db_connection, paste0("update load_stats set load_status='", status, "' where id=", current_load_id) )    
   }
