@@ -11,15 +11,15 @@
 ##
 ################################################################################
 
-FULL_DEBUG <- TRUE
-IN_TEST_MODE <- FALSE
+FULL_DEBUG <- "TRUE"
+IN_TEST_MODE <- "FALSE"
 
 # hoew long to wait in between processing each file (seconds)
 DEFAULT_FILE_READER_PROCESS_INTERVAL <- 60
 FILE_READER_WAIT_TIME_IN_SECONDS <- DEFAULT_FILE_READER_PROCESS_INTERVAL
 
 # do data files have unique names?
-FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- FALSE
+FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- "FALSE"
 
 
 FILE_APP <- "app.R"

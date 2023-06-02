@@ -1,5 +1,3 @@
-
-
 TABLE_LOAD_STATS <- "load_stats"
 TABLE_RECORDS_COMPLETE <- "cases_reported_complete"
 TABLE_RECORDS_BAD <- "cases_reported_bad"
@@ -20,8 +18,8 @@ fnLogMessage <- function(msg){
 }
 
 
-FULL_DEBUG   <- Sys.getenv("FS_IN_DEBUG_MODE", unset = FALSE)
-IN_TEST_MODE <- Sys.getenv("FS_IN_TEST_MODE", unset = FALSE)
+FULL_DEBUG   <- Sys.getenv("FS_IN_DEBUG_MODE", unset = "FALSE")
+IN_TEST_MODE <- Sys.getenv("FS_IN_TEST_MODE", unset = "FALSE")
 
 fnLogMessage(paste0("APP RUNNING IN DEBUG MODE: ", FULL_DEBUG))
 fnLogMessage(paste0("APP RUNNING IN TEST MODE: ", IN_TEST_MODE))
@@ -35,7 +33,7 @@ DB_USER<- Sys.getenv("DBUsername")
 DB_PASSWORD <- Sys.getenv("DBPassword")
 
 env_db_info <- paste0("ENVIRONMENT INFO - db_diver: ", DB_DRIVER, " db_server: ", DB_SERVER_NAME , " port: ", DB_PORT, " db_instance: ", DB_INSTANCE, " user: ", DB_USER," pw: ", DB_PASSWORD )
-if (FULL_DEBUG && IN_TEST_MODE)
+if (FULL_DEBUG=="TRUE" && IN_TEST_MODE=="TRUE")
   fnLogMessage(env_db_info)
 
 DATA_FOLDER_NAME <- Sys.getenv("FS_READER_DATA_PATH")
@@ -59,5 +57,5 @@ env_data_path_info <- paste0("DATA PATH INFO - data folder: [", DATA_FOLDER_NAME
  BAD_DATA_FOLDER, "], Process Intervals: [",
  FILE_READER_WAIT_TIME_IN_SECONDS, "]", ". Unique data file names enforced? [", FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES,"]")
 
-if (FULL_DEBUG && IN_TEST_MODE)
+if (FULL_DEBUG=="TRUE" && IN_TEST_MODE=="TRUE")
   fnLogMessage(env_data_path_info)
