@@ -1,3 +1,6 @@
+
+FILE_DATA_PROCESSOR <- "utils.R"
+
 TABLE_LOAD_STATS <- "load_stats"
 TABLE_RECORDS_COMPLETE <- "cases_reported_complete"
 TABLE_RECORDS_BAD <- "cases_reported_bad"
@@ -37,8 +40,8 @@ fnDisplayDataset <- function(data_set, default_msg){
 FULL_DEBUG   <- Sys.getenv("FS_IN_DEBUG_MODE", unset = "FALSE")
 IN_TEST_MODE <- Sys.getenv("FS_IN_TEST_MODE", unset = "FALSE")
 
-fnLogMessage(paste0("APP RUNNING IN DEBUG MODE: ", FULL_DEBUG))
-fnLogMessage(paste0("APP RUNNING IN TEST MODE: ", IN_TEST_MODE))
+fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - APP RUNNING IN DEBUG MODE: ", FULL_DEBUG))
+fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - APP RUNNING IN TEST MODE: ", IN_TEST_MODE))
 
 # using environment variables
 DB_DRIVER <- Sys.getenv("PostgresDriver")
@@ -49,7 +52,9 @@ DB_USER<- Sys.getenv("DBUsername")
 DB_PASSWORD <- Sys.getenv("DBPassword")
 
 # in test mode, we bypass db, so no need to show db info
-env_db_info <- paste0("ENVIRONMENT INFO - db_diver: ", DB_DRIVER, " db_server: ", DB_SERVER_NAME , " port: ", DB_PORT, " db_instance: ", DB_INSTANCE, " user: ", DB_USER," pw: ", DB_PASSWORD )
+env_db_info <- paste0(FILE_DATA_PROCESSOR, " - ENVIRONMENT INFO - db_diver: ", DB_DRIVER, " db_server: ", DB_SERVER_NAME , " port: ", DB_PORT, " db_instance: ", DB_INSTANCE, " user: ", DB_USER," pw: ", DB_PASSWORD )
+
+# but if we are in full debug mode, show the db info
 if (IN_TEST_MODE=="FALSE" && FULL_DEBUG=="TRUE" )
   fnLogMessage(env_db_info) # just to make sure we are reading the correct variables
 
@@ -59,22 +64,28 @@ BAD_DATA_FOLDER <- Sys.getenv("FS_READER_DATA_BAD_PATH")
 
 FILE_READER_WAIT_TIME_IN_SECONDS <- Sys.getenv("FILE_READER_WAIT_TIME_IN_SECONDS", unset = NA)
 if (is.na(FILE_READER_WAIT_TIME_IN_SECONDS)){
-  fnLogMessage(paste0("Environment variable FILE_READER_WAIT_TIME_IN_SECONDS not found. Using default: ", DEFAULT_FILE_READER_PROCESS_INTERVAL, "seconds"))
+  fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - Environment variable FILE_READER_WAIT_TIME_IN_SECONDS not found. Using default: ", DEFAULT_FILE_READER_PROCESS_INTERVAL, "seconds."))
   FILE_READER_WAIT_TIME_IN_SECONDS <- DEFAULT_FILE_READER_PROCESS_INTERVAL
+}else{
+  fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - Environment variable FILE_READER_WAIT_TIME_IN_SECONDS is set to : ", FILE_READER_WAIT_TIME_IN_SECONDS, "seconds."))
 }
 
 
 FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- Sys.getenv("FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES", unset = NA)
 if (is.na(FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES)){
-  fnLogMessage(paste0("Environment variable FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES not found. Using default: FALSE"))
+  fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - Environment variable FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES not found. Using default: FALSE."))
   FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- FALSE
+}else{
+  fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - Environment variable FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES is set to TRUE."))
+  FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- TRUE
 }
 
-env_data_path_info <- paste0("DATA PATH INFO - Base folder: ", DATA_FOLDER_NAME, ", Completed folder: ", COMPLETED_DATA_FOLDER , ", Bad data folder: ", BAD_DATA_FOLDER )
 
-env_reader_params <- paste0("OTHER PARAMS: Process Intervals (seconds): ", FILE_READER_WAIT_TIME_IN_SECONDS, ". Unique data file names enforced? ", FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES)
+env_data_path_info <- paste0(FILE_DATA_PROCESSOR, " - DATA PATH INFO - Base folder: ", DATA_FOLDER_NAME, ", Completed folder: ", COMPLETED_DATA_FOLDER , ", Bad data folder: ", BAD_DATA_FOLDER )
 
-if ((FULL_DEBUG=="TRUE") && (IN_TEST_MODE=="TRUE")){
-  fnLogMessage(env_data_path_info)
-   fnLogMessage(env_reader_params)
-}
+env_reader_params <- paste0(FILE_DATA_PROCESSOR, " - OTHER PARAMS: Process Intervals (seconds): ", FILE_READER_WAIT_TIME_IN_SECONDS, ". Unique data file names enforced? ", FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES)
+
+#if ((FULL_DEBUG=="TRUE") && (IN_TEST_MODE=="TRUE")){
+fnLogMessage(env_data_path_info)
+fnLogMessage(env_reader_params)
+#}

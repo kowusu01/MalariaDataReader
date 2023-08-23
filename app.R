@@ -9,10 +9,13 @@
 ## https://medium.com/codex/how-to-persist-and-backup-data-of-a-postgresql-docker-container-9fe269ff4334
 ## https://www.r-bloggers.com/2018/07/connecting-r-to-postgresql-on-linux/
 ##
+## Docker base iamge
+##  - https://hub.docker.com/_/r-base
+##
 ################################################################################
 
 FULL_DEBUG <- "TRUE"
-IN_TEST_MODE <- "FALSE"
+IN_TEST_MODE <- "TRUE"
 
 # hoew long to wait in between processing each file (seconds)
 DEFAULT_FILE_READER_PROCESS_INTERVAL <- 60
@@ -81,6 +84,3 @@ fnMain <- function()
 result <- fnMain()
 
 # end of file
-
-
-
