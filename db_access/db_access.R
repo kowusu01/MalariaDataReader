@@ -38,6 +38,28 @@ fnGetLoadStatsId <- function(db_connection){
   return (df[1,1]) # return the primary key
 }
 
+################################################################################
+#
+# get the file path from db to check if it's been already processed
+#
+################################################################################
+fnIsFileAlreadyProcessed <- function(db_connection, file_name){
+  
+  CURRENT_FUNCTION <- "fnIsFileAlreadyProcessed()"
+  
+  if (IN_TEST_MODE==TRUE){
+    fnLogMessage(paste0(FILE_DB_ACCESS, ".", CURRENT_FUNCTION, " - IN_TEST_MODE  - always return false in test mode."))  
+    return (FALSE)
+  }
+  
+  fnLogMessage(paste0(FILE_DB_ACCESS, ".", CURRENT_FUNCTION, paste0(" - checking if file has already been procesed: ", file_name)))
+  safe_fileName <- DBI::dbQuoteLiteral(db_connection, file_name)
+  df <- DBI::dbGetQuery(db_connection, paste("SELECT 1 from load_stats WHERE file_path = ", safe_fileName) )
+  
+  return ( nrow(df) > 0)
+}
+
+
 fnUpdateLoadStatus <- function(db_connection, status){
   
   CURRENT_FUNCTION <- "fnUpdateLoadStatus()"

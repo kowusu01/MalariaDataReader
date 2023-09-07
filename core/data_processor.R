@@ -38,9 +38,35 @@ fnProcessDataset <- function(file_name){
   load_stats_id <- NA
   error_status <- NA
   
-
   db_connection <- fnCreateConnection(DB_DRIVER, DB_INSTANCE, DB_SERVER_NAME, DB_PORT, DB_USER, DB_PASSWORD)
   
+  
+  data_file_path <- paste0(DATA_FOLDER_NAME, file_name)
+  bProceed = TRUE
+  
+  fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - Step 0: checking if file has already been processed - ", data_file_path))
+  
+  if (FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES){
+    tryCatch(
+      {
+        if ( fnIsFileAlreadyProcessed(db_connection, data_file_path) ){
+          fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, paste0(" - file already processed: ", file_name)))
+          bProceed = FALSE
+        }
+      },
+      error=function(ex){
+        fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, paste("- error while checking if file already processed:", data_file_path, ex)))
+        bProceed = FALSE
+        }
+    )
+  }
+  
+  if(!bProceed){
+    fnCloseConnection(db_connection)
+    return (NA)
+  }
+  
+    
   country_is_na <- NA
   year_is_na <- NA
   numcases_is_na <- NA
@@ -48,8 +74,6 @@ fnProcessDataset <- function(file_name){
   region_is_na <- NA
   data_set_complete_cases <- NA
   
-  
-      data_file_path <- paste0(DATA_FOLDER_NAME, file_name)
       
       # STEP 1: read the data file -  tryCatch #1 
       tryCatch({ 
@@ -355,11 +379,6 @@ fnSaveErrorToDB <- function(data_file_path, error_msg, db_table, db_connection, 
     }
   }
   else{
-    
-    # update record
-    #current_record_id = 1
-    #error_msg = "Hello"
-    #db_table = "load_stats"
     query <- paste0("update ", db_table, " set load_status='Error', error_message='", error_msg , "' where id=", current_record_id )
     
     if (FULL_DEBUG=="TRUE"){

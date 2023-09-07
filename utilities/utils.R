@@ -71,12 +71,13 @@ if (is.na(FILE_READER_WAIT_TIME_IN_SECONDS)){
 }
 
 
-FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- Sys.getenv("FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES", unset = NA)
-if (is.na(FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES)){
-  fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - Environment variable FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES not found. Using default: FALSE."))
+FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- Sys.getenv("FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES", unset = "FALSE")
+
+if (FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES=="FALSE"){
+  fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - Unique filenames is disabled, it can be enabled in the config."))
   FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- FALSE
 }else{
-  fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - Environment variable FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES is set to TRUE."))
+  fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - Unique filenames is enabled, it can be disabled in the config. "))
   FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES <- TRUE
 }
 
