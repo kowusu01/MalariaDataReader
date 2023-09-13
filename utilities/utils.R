@@ -37,8 +37,8 @@ fnDisplayDataset <- function(data_set, default_msg){
   }
 }
 
-FULL_DEBUG   <- Sys.getenv("FS_IN_DEBUG_MODE", unset = "FALSE")
-IN_TEST_MODE <- Sys.getenv("FS_IN_TEST_MODE", unset = "FALSE")
+FULL_DEBUG   <- Sys.getenv("FS_IN_DEBUG_MODE", unset = "TRUE")
+IN_TEST_MODE <- Sys.getenv("FS_IN_TEST_MODE", unset = "TRUE")
 
 fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - APP RUNNING IN DEBUG MODE: ", FULL_DEBUG))
 fnLogMessage(paste0(FILE_DATA_PROCESSOR, " - APP RUNNING IN TEST MODE: ", IN_TEST_MODE))
@@ -58,9 +58,9 @@ env_db_info <- paste0(FILE_DATA_PROCESSOR, " - ENVIRONMENT INFO - db_diver: ", D
 if (IN_TEST_MODE=="FALSE" && FULL_DEBUG=="TRUE" )
   fnLogMessage(env_db_info) # just to make sure we are reading the correct variables
 
-DATA_FOLDER_NAME <- Sys.getenv("FS_READER_DATA_PATH")
-COMPLETED_DATA_FOLDER <- Sys.getenv("FS_READER_DATA_COMPLETED_PATH")
-BAD_DATA_FOLDER <- Sys.getenv("FS_READER_DATA_BAD_PATH")
+DATA_FOLDER_NAME <- Sys.getenv("FS_READER_DATA_PATH", unset = "data")
+COMPLETED_DATA_FOLDER <- Sys.getenv("FS_READER_DATA_COMPLETED_PATH", unset = "data/completed")
+BAD_DATA_FOLDER <- Sys.getenv("FS_READER_DATA_BAD_PATH", unset = "data/bad")
 
 FILE_READER_WAIT_TIME_IN_SECONDS <- Sys.getenv("FILE_READER_WAIT_TIME_IN_SECONDS", unset = NA)
 if (is.na(FILE_READER_WAIT_TIME_IN_SECONDS)){

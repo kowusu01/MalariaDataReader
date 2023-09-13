@@ -40,8 +40,7 @@ fnProcessDataset <- function(file_name){
   
   db_connection <- fnCreateConnection(DB_DRIVER, DB_INSTANCE, DB_SERVER_NAME, DB_PORT, DB_USER, DB_PASSWORD)
   
-  
-  data_file_path <- paste0(DATA_FOLDER_NAME, file_name)
+  data_file_path <- file.path(DATA_FOLDER_NAME, file_name)
   bProceed = TRUE
   
   fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - Step 0: checking if file has already been processed - ", data_file_path))
@@ -55,7 +54,7 @@ fnProcessDataset <- function(file_name){
         }
       },
       error=function(ex){
-        fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, paste("- error while checking if file already processed:", data_file_path, ex)))
+        fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, paste("- error while checking if file already processed:[", data_file_path, "]. ", ex)))
         bProceed = FALSE
         }
     )
@@ -88,20 +87,20 @@ fnProcessDataset <- function(file_name){
           fnDisplayDataset(data_set)
           
         },
-        error=function(ex){ 
-          error_status <- "failed"
-          error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception  tryCatch #1 trying to read csv file: ", file_name, ex)
-          fnLogMessage(error_msg)
-          fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
-        },
       error=function(ex){
         error_status <- "failed"
-        error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - something happened in tryCatch #1: ", ex)
+        error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception  trying to read csv file: [", file_name, "]. ", ex)
         fnLogMessage(error_msg)
         
         # do not rollback the load_stats record
-        fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
-        fnCloseConnection(db_connection)
+        tryCatch(
+          {
+            fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)    
+            fnCloseConnection(db_connection)
+          },
+          error=function(ex){}
+        )
+        
       }) # try catch #1
 
       
@@ -146,11 +145,17 @@ fnProcessDataset <- function(file_name){
       },
       error=function(ex){ 
         error_status <- "failed"
-        error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in  tryCatch #2 analysing dataset for bad data: ", file_name, ex)
+        error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in  analyzing dataset for bad data: [", file_name,"]. ", ex)
         fnLogMessage(error_msg)
-        fnRollbackTransaction(db_connection)
-        fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
-        fnCloseConnection(db_connection)
+        tryCatch(
+          {
+            fnRollbackTransaction(db_connection)
+            fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
+            fnCloseConnection(db_connection)
+          },
+          error = function(ex){
+          })
+        
       }) #  try catch #2
       
       
@@ -196,12 +201,18 @@ fnProcessDataset <- function(file_name){
         },
         error=function(ex){ 
           error_status <- "failed"
-          error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in  tryCatch #3 building the issues dataset for bad data: ", file_name, ex)
+          error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in building the issues dataset for bad data: ", file_name, ex)
           fnLogMessage(error_msg)
           
-          fnRollbackTransaction(db_connection)
-          fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
-          fnCloseConnection(db_connection)
+          tryCatch(
+            {
+              fnRollbackTransaction(db_connection)
+              fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
+              fnCloseConnection(db_connection)    
+            },
+            error = function(ex){}
+          )
+          
         }) #  try catch #3
         
       
@@ -233,8 +244,9 @@ fnProcessDataset <- function(file_name){
           final_load_status <- 'Processing'
           #err_message - NA
           
+          
           basic_stats <- data.frame(
-            descr = c(paste("data load for", data_file_path)),
+            descr =  strsplit(file_name, "_")[[1]][1],
             load_timestamp = c( now() ),
             file_path = c(data_file_path),
             load_status = final_load_status,
@@ -251,13 +263,33 @@ fnProcessDataset <- function(file_name){
           fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - done saving  [load_stats] row to db."))
         },
         error=function(ex){ 
+          
           error_status <- "failed"
-          error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in  tryCatch #4 building the issues dataset for bad data: ", file_name, ex)
+          
+          error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in saving LoadStats record to db: [", file_name,"]. ",  ex)
           fnLogMessage(error_msg)
           
-          fnRollbackTransaction(db_connection)
-          fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
-          fnCloseConnection(db_connection)
+          tryCatch({
+            fnRollbackTransaction(db_connection)  
+          },
+          error=function(ex){
+            error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - saving LoadStats record failed, rolling back transaction as a result of this error also failed: [", file_name,"]. ", ex)
+          })
+          
+          
+          tryCatch({
+            fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
+          },
+          error=function(ex){
+            error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - building the issues dataset for bad data failed, saving Bad Data record for this error also failed: [", file_name,"]. ", ex)
+          })
+          
+          tryCatch(
+            {
+              fnCloseConnection(db_connection)
+            }, 
+            error=function(ex){})
+          
         }) #  try catch #4
         
         
@@ -275,7 +307,6 @@ fnProcessDataset <- function(file_name){
           load_stats_id <- fnGetLoadStatsId(db_connection)
           fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - done loading load_stats id from db"))
           
-
           ## BEGIN TRANS
           fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - beginning db transaction to save other datasets..."))
           fnBeginTransaction(db_connection)
@@ -318,26 +349,41 @@ fnProcessDataset <- function(file_name){
           fnUpdateLoadStatus(db_connection, "Completed")
           
           fnCommitTransaction(db_connection)
-          
-         
         },
         error=function(ex){ 
           error_status <- "failed"
-          error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in  tryCatch #5 building the issues dataset for bad data: ", file_name, ex)
+          error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in saving the issues dataset: [", file_name,"]. ",  ex)
           fnLogMessage(error_msg)
           
           # in case of error, rollback, then update the load_stats record status to Error
-          fnRollbackTransaction(db_connection)
-          fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection, load_stats_id)
+          tryCatch(
+            {
+              fnRollbackTransaction(db_connection)
+            },
+            error = function(ex){
+            })
+          
+          tryCatch(
+            {
+              fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection, load_stats_id)  
+            },
+            error = function(ex)
+            {
+            })
+          
         },
         finally={
-          fnCloseConnection(db_connection)
+          tryCatch({
+              fnCloseConnection(db_connection)
+          }, error= function(ex){
+                
+          })
+          
         }) # try catch #5
 }
 
 fnSaveDataInDatabase <- function(data_set, db_table, db_connection)
 {
-  
   CURRENT_FUNCTION <- "fnSaveDataInDatabase()"
   
   #https://stackoverflow.com/questions/33634713/rpostgresql-import-dataframe-into-a-table
@@ -388,7 +434,6 @@ fnSaveErrorToDB <- function(data_file_path, error_msg, db_table, db_connection, 
     if (!is.na(db_connection)){
       DBI::dbSendQuery(db_connection, query)
     }
-    
   }
     
 }

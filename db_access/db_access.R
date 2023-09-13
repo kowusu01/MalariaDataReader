@@ -52,7 +52,7 @@ fnIsFileAlreadyProcessed <- function(db_connection, file_name){
     return (FALSE)
   }
   
-  fnLogMessage(paste0(FILE_DB_ACCESS, ".", CURRENT_FUNCTION, paste0(" - checking if file has already been procesed: ", file_name)))
+  fnLogMessage(paste0(FILE_DB_ACCESS, ".", CURRENT_FUNCTION, paste0(" - checking if file has already been processed: ", file_name)))
   safe_fileName <- DBI::dbQuoteLiteral(db_connection, file_name)
   df <- DBI::dbGetQuery(db_connection, paste("SELECT 1 from load_stats WHERE file_path = ", safe_fileName) )
   

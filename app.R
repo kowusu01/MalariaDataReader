@@ -17,7 +17,7 @@
 FULL_DEBUG <- "TRUE"
 IN_TEST_MODE <- "TRUE"
 
-# hoew long to wait in between processing each file (seconds)
+# how long to wait in between processing each file (seconds)
 DEFAULT_FILE_READER_PROCESS_INTERVAL <- 60
 FILE_READER_WAIT_TIME_IN_SECONDS <- DEFAULT_FILE_READER_PROCESS_INTERVAL
 
@@ -55,10 +55,11 @@ fnMain <- function()
          for (f in data_files){
            fnLogMessage(paste0(FILE_APP, ".", CURRENT_FUNCTION, " --------------------------------------------------------------------------"))
            fnLogMessage(paste0(FILE_APP, ".", CURRENT_FUNCTION, " - processing file : ", f))
+           print(f)
            fnProcessDataset(f)
            
-           data_file_path <- paste0(DATA_FOLDER_NAME, f)
-           completed_path <- paste0(COMPLETED_DATA_FOLDER, f)
+           data_file_path <- file.path(DATA_FOLDER_NAME, f)
+           completed_path <- file.path(COMPLETED_DATA_FOLDER, f)
            fs::file_move(data_file_path, completed_path)
            
            fnLogMessage(paste0(FILE_APP, ".", CURRENT_FUNCTION, " - done loading file ", f, " to db."))
