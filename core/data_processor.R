@@ -14,6 +14,9 @@ fnReadCSVDataFile <- function(data_file_path){
   return(data)
 }
 
+ERROR_STATUS_OK <- "OK"
+ERROR_STATUS_FAILED <- "FAILED"
+
 
 fnProcessDataset <- function(file_name){
   # general stats
@@ -36,13 +39,16 @@ fnProcessDataset <- function(file_name){
   
   db_connection <- NA
   load_stats_id <- NA
-  error_status <- NA
-  
+
   db_connection <- fnCreateConnection(DB_DRIVER, DB_INSTANCE, DB_SERVER_NAME, DB_PORT, DB_USER, DB_PASSWORD)
   
   data_file_path <- file.path(DATA_FOLDER_NAME, file_name)
-  bProceed = TRUE
   
+  
+  my_env = new.env()
+  my_env$error_status <- ERROR_STATUS_OK
+  
+
   fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - Step 0: checking if file has already been processed - ", data_file_path))
   
   if (FILE_READER_ENFORCE_UNIQUE_DATA_FILE_NAMES){
@@ -50,21 +56,23 @@ fnProcessDataset <- function(file_name){
       {
         if ( fnIsFileAlreadyProcessed(db_connection, data_file_path) ){
           fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, paste0(" - file already processed: ", file_name)))
-          bProceed = FALSE
         }
       },
       error=function(ex){
         fnLogMessage(paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, paste("- error while checking if file already processed:[", data_file_path, "]. ", ex)))
-        bProceed = FALSE
+        assign("error_status", ERROR_STATUS_FAILED, env=my_env)
         }
     )
   }
   
-  if(!bProceed){
+  if(my_env$error_status==ERROR_STATUS_FAILED){
     fnCloseConnection(db_connection)
     return (NA)
   }
   
+    
+  # reset error status
+  my_env$error_status <- ERROR_STATUS_OK
     
   country_is_na <- NA
   year_is_na <- NA
@@ -73,7 +81,6 @@ fnProcessDataset <- function(file_name){
   region_is_na <- NA
   data_set_complete_cases <- NA
   
-      
       # STEP 1: read the data file -  tryCatch #1 
       tryCatch({ 
         
@@ -88,7 +95,9 @@ fnProcessDataset <- function(file_name){
           
         },
       error=function(ex){
-        error_status <- "failed"
+        
+        my_env$error_status <- ERROR_STATUS_FAILED
+        
         error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception  trying to read csv file: [", file_name, "]. ", ex)
         fnLogMessage(error_msg)
         
@@ -104,10 +113,11 @@ fnProcessDataset <- function(file_name){
       }) # try catch #1
 
       
-      if (!is.na(error_status))
+      if(my_env$error_status==ERROR_STATUS_FAILED)
         return (NA)
       
-      error_status <- NA
+      ## reset error
+      my_env$error_status <- ERROR_STATUS_OK
       
       # STEP 2: explore and find bad data -  tryCtach #2  
       tryCatch({
@@ -144,25 +154,29 @@ fnProcessDataset <- function(file_name){
         
       },
       error=function(ex){ 
-        error_status <- "failed"
+        
+        my_env$error_status <- ERROR_STATUS_FAILED
         error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in  analyzing dataset for bad data: [", file_name,"]. ", ex)
         fnLogMessage(error_msg)
+        
         tryCatch(
           {
             fnRollbackTransaction(db_connection)
+            fnLogMessage("ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
             fnCloseConnection(db_connection)
+            
           },
           error = function(ex){
           })
         
       }) #  try catch #2
       
-      
-      if (!is.na(error_status))
+      if (my_env$error_status==ERROR_STATUS_FAILED)
         return (NA)
       
-      error_status <- NA
+      ## reset error
+      my_env$error_status <- ERROR_STATUS_OK
       
       # STEP 3: create a list of all the data issues -  tryCatch #3
       tryCatch({
@@ -200,7 +214,9 @@ fnProcessDataset <- function(file_name){
         fnDisplayDataset(issues_details, paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - issues details dataset is empty"))
         },
         error=function(ex){ 
-          error_status <- "failed"
+          
+          my_env$error_status <- ERROR_STATUS_FAILED
+          
           error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in building the issues dataset for bad data: ", file_name, ex)
           fnLogMessage(error_msg)
           
@@ -216,10 +232,11 @@ fnProcessDataset <- function(file_name){
         }) #  try catch #3
         
       
-        if (!is.na(error_status))
+        if (my_env$error_status==ERROR_STATUS_FAILED)
           return (NA)
         
-        error_status <- NA
+      ## reset error
+      my_env$error_status <- ERROR_STATUS_OK
         
         
         # STEP 4: saving datasets -  tryCatch #4
@@ -264,7 +281,7 @@ fnProcessDataset <- function(file_name){
         },
         error=function(ex){ 
           
-          error_status <- "failed"
+          my_env$error_status <- ERROR_STATUS_FAILED
           
           error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in saving LoadStats record to db: [", file_name,"]. ",  ex)
           fnLogMessage(error_msg)
@@ -275,7 +292,6 @@ fnProcessDataset <- function(file_name){
           error=function(ex){
             error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - saving LoadStats record failed, rolling back transaction as a result of this error also failed: [", file_name,"]. ", ex)
           })
-          
           
           tryCatch({
             fnSaveErrorToDB(file_name, error_msg, TABLE_LOAD_STATS, db_connection)
@@ -293,10 +309,11 @@ fnProcessDataset <- function(file_name){
         }) #  try catch #4
         
         
-        if (!is.na(error_status))
+        if (my_env$error_status==ERROR_STATUS_FAILED)
           return (NA)
         
-        error_status <- NA
+        ## reset error
+        my_env$error_status <- ERROR_STATUS_OK
         
         # STEP 4.2 - save the other datasets in a transaction, if anything happens rollback
         #  try catch #5
@@ -351,7 +368,9 @@ fnProcessDataset <- function(file_name){
           fnCommitTransaction(db_connection)
         },
         error=function(ex){ 
-          error_status <- "failed"
+          
+          my_env$error_status <- ERROR_STATUS_FAILED
+          
           error_msg <- paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - exception in saving the issues dataset: [", file_name,"]. ",  ex)
           fnLogMessage(error_msg)
           
@@ -402,7 +421,7 @@ fnSaveErrorToDB <- function(data_file_path, error_msg, db_table, db_connection, 
     
   if (is.na(current_record_id)){
     error_stats <- data.frame(
-      descr = paste("csv load for ", data_file_path),
+      descr = strsplit(data_file_path, "_")[[1]][1],
       load_timestamp = now(),
       file_path = data_file_path,
       load_status = "Error",
