@@ -1,6 +1,7 @@
 
 library(tidyverse)
 library(data.table)
+library(jsonlite)
 
 #--------------------------------------------------------------------------------
 # 
@@ -75,14 +76,15 @@ createConsolidatedCountryList <- function(){
   ## found by accident
   # world_bank_pop %>% head()
   
+  
   world_countries_cols <- c("country_name","official_name","iso_2","iso_3","iso_num")
   world_countries <- fread("./utilities/world_countries.csv", col.names = world_countries_cols)
   
   who_countries_cols <- c("region_name", "country_name")
   who_countries <- fread("./utilities/who_countries.csv", col.names = who_countries_cols)
   
-  who_regions_cols <- c("region", "region_name")
-  who_regions <- fread("./utilities/who_regions.csv", col.names = who_regions_cols)
+  who_regions_cols <- c("region", "region_code", "region_name")
+  who_regions <- read.csv("./utilities/who_regions.csv", col.names = who_regions_cols )
 
   world_countries <- (world_countries %>% 
     left_join(who_countries, by="country_name") %>% 
@@ -92,16 +94,33 @@ createConsolidatedCountryList <- function(){
   
   world_countries <- world_countries %>% mutate(iso_num= padISONumeric(iso_num))
   
-  world_countries <- world_countries %>% select(country_name, official_name, region, region_name, is_who_country, iso_2, iso_3)
+  world_countries <- world_countries %>% select(country_name, official_name, region, region_code,  region_name, is_who_country, iso_2, iso_3, iso_num)
   
+  world_countries <- world_countries %>% mutate(region = if_else(
+                                                  is.na(region),
+                                                   "",
+                                                  region  
+                                                    )
+                                                )
+  
+  output_file <- "./utilities/country_list_cleaned.csv"
+  write.csv2(world_countries, output_file)
+  write.csv2(world_countries, output_file, row.names = FALSE)
+  
+  # write json file
+  rownames(world_countries) <- NULL
+  colnames(world_countries) <- c("CountryName", "OfficialName","WHORegion", "WHORegionCode",  "WHORegionName","IsWHOCountry", "ISO2","ISO3", "ISONum")
+ glimpse(world_countries)
+   world_countries <- 
+    as_tibble(world_countries)
+  
+   # REF: https://rpubs.com/Shaunson26/dataframe2json
+   json <- toJSON(x = world_countries, dataframe = 'rows', pretty = T)
   glimpse(world_countries)
-  
-  output_file    <- "./utilities/country_list_cleaned.csv"
-  write.csv2(output_file, output_file)
-  
+  write(json, "./utilities/countrylist.json")
 }
 
 #getUniqueCountriesFromDataFile()
 #splitDataByRegion()
-#createConsolidatedCountryList()
+createConsolidatedCountryList()
 
