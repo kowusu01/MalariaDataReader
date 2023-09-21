@@ -28,7 +28,15 @@ fnFindNullsInColumn <- function(data_set,taregt_col_name){
              issue_type=rep(ISSUE_TYPE_ERROR, nrow(null_values_in_target_col)), 
              issue=rep(paste(taregt_col_name, ' is null'), nrow(null_values_in_target_col)))
   }
+  
+  
   fnDisplayDataset(null_values_in_target_col, paste0(FILE_DATA_PROCESSOR, ".", CURRENT_FUNCTION, " - issues details dataset is empty"))
+  
+  
+}
+
+fnFindDataErrors <- function(data_set, target_column_name){
+  
 }
 
 fnDataInconsistencyNumDeaths <- function(data_set){
@@ -43,9 +51,9 @@ fnDataInconsistencyNumDeaths <- function(data_set){
   return(deaths_more_than_cases)
 }
 
-
 fnTransformColumns <- function(data_set){
-
+  browser()
+  
   # convert all numeric numbers to to 0
   data_set <- data_set %>% mutate(country = if_else(is.na(country), "", country))
   data_set <- data_set %>% mutate(region = if_else(is.na(region), "", region))
