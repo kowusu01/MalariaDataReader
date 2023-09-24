@@ -14,7 +14,7 @@
 ##
 ################################################################################
 
-
+# data_set %> % filter(is.na(region_code)) %>% select(country) %>% distinct()
 
 FULL_DEBUG <- "TRUE"
 IN_TEST_MODE <- "TRUE"
