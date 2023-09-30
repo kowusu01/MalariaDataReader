@@ -48,12 +48,11 @@ fnMain <- function()
     {
       while (TRUE){
        data_files <- list.files(DATA_FOLDER_NAME, pattern = ".csv")
-       fnLogMessage(paste0(FILE_APP, ".", CURRENT_FUNCTION, " - number of csv files found: ", length(data_files)))
-      
        if (length(data_files)==0){
          fnLogMessage(paste0(FILE_APP, ".", CURRENT_FUNCTION, " - no data found."))
         }
        else{
+         fnLogMessage(paste0(FILE_APP, ".", CURRENT_FUNCTION, " - number of csv files found: ", length(data_files)))
          for (f in data_files){
            fnLogMessage(paste0(FILE_APP, ".", CURRENT_FUNCTION, " --------------------------------------------------------------------------"))
            fnLogMessage(paste0(FILE_APP, ".", CURRENT_FUNCTION, " - processing file : ", f))
