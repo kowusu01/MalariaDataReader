@@ -121,7 +121,29 @@ createConsolidatedCountryList <- function(){
   
 }
 
-#getUniqueCountriesFromDataFile()
-#splitDataByRegion()
-createConsolidatedCountryList()
+# getUniqueCountriesFromDataFile()
+# splitDataByRegion()
+# createConsolidatedCountryList()
+
+
+createKaggleVersion <- function(){
+  
+  # the the cleaned data file
+  world_countries <- read.csv2("./utilities/country_list_cleaned.csv")
+  
+  world_countries <- world_countries %>%  select(CountryName, OfficialName, IsWHOCountry, WHORegion, WHORegionCode,  WHORegionName, ISO2, ISO3, ISONum)
+  colnames(world_countries)[2] <- "LongName"
+  glimpse(world_countries)
+
+  world_countries %>% filter(IsWHOCountry==TRUE) %>% select(CountryName) %>% nrow()
+  
+  who_countries_df <- world_countries %>% filter(IsWHOCountry==FALSE) %>% select(CountryName) %>% arrange(CountryName)
+  write.csv(who_countries_df, "./utilities/my-regions.csv", row.names = FALSE)
+  
+  write.csv(world_countries, "./utilities/csv-who_countries.csv", row.names = FALSE)
+  write.csv2(world_countries, "./utilities/csv2-who-countries.csv", row.names = FALSE)
+  
+}
+
+createKaggleVersion()
 
